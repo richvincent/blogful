@@ -2,6 +2,8 @@ from flask import render_template
 
 from blog import app
 from .database import session, Entry
+from flask import request, redirect, url_for
+
 
 PAGINATE_BY = 5
 
@@ -32,3 +34,28 @@ def entries(page=1):
                            page=page,
                            total_pages=total_pages
                            )
+
+
+@app.route("/entry/<int:entry>")
+def display_entry(entry=1):
+
+    entries = session.query(Entry).filter_by(id=entry).all()
+
+    return render_template("display_entry.html",
+                           entries=entries)
+
+
+@app.route("/entry/add", methods=["GET"])
+def add_entry_get():
+    return render_template("add_entry.html")
+
+
+@app.route("/entry/add", methods=["POST"])
+def add_entry_post():
+    entry = Entry(
+        title=request.form["title"],
+        content=request.form["content"],
+    )
+    session.add(entry)
+    session.commit()
+    return redirect(url_for("entries"))
