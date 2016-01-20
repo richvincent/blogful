@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% for entry in entries %}
+
+<ul>
+	<li>entry.datetime {{ entry.datetime }}</li>
+</ul>
+
+
+<h1>
+	Edit Entry # {{ entry.id }}
+</h1>
+
+<form role="form" method="POST">
+	<div class="form-group">
+		<label for="title">Title</label>
+		<input type="text" class="form-control" id="title" name="title" required value={{ entry.title }}>
+	</div>
+	<div class="form-group">
+		<label for="content">Content</label>
+		<textarea class="form-control" id="content" name="content" placeholder="Entry content" rows="20" required>{{ entry.content }}</textarea>
+	</div>
+	<button type="submit" class="btn btn-default">Submit</button>
+	<br><br><br>
+	<input type="text" class="form-control" id="id" name="id" required value={{ entry.id }}>
+						 
+</form>
+{% endfor %}
+{% endblock %}
