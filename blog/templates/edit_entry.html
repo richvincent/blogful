@@ -16,7 +16,7 @@
 <form role="form" method="POST">
 	<div class="form-group">
 		<label for="title">Title</label>
-		<input type="text" class="form-control" id="title" name="title" required value={{ entry.title }}>
+		<input type="text" class="form-control" id="title" name="title" value={{ entry.title }} required>
 	</div>
 	<div class="form-group">
 		<label for="content">Content</label>
@@ -24,7 +24,7 @@
 	</div>
 	<button type="submit" class="btn btn-default">Submit</button>
 	<br><br><br>
-	<input type="text" class="form-control" id="id" name="id" required value={{ entry.id }}>
+	<input type="text" class="form-control" id="id" name="id" value={{ entry.id }} required>
 						 
 </form>
 {% endfor %}

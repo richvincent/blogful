@@ -70,12 +70,13 @@ def edit_entry_get(entryId=1):
 
 
 @app.route("/entry/<int:entryId>/edit/", methods=["POST"])
-def edit_entry_post():
+def edit_entry_post(entryId=1):
 
     entryId = request.form["id"]
 
-    entry = session.query(Entry).filter_by(id=entryId).all()
+    entry = session.query(Entry).get(entryId)
     entry.title = request.form["title"]
-    entry.content = request._form["content"]
-    session.commit(entry)
+    entry.content = request.form["content"]
+    session.add(entry)
+    session.commit()
     return redirect(url_for("entries"))
