@@ -80,3 +80,10 @@ def edit_entry_post(entryId=1):
     session.add(entry)
     session.commit()
     return redirect(url_for("entries"))
+
+
+@app.route("/entry/<int:entryId>/delete")
+def delete_entry_get(entryId=1):
+
+    # entryId = session.query(Entry).get(entryId)
+    return render_template("delete_entry.html")
