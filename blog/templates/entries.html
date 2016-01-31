@@ -8,20 +8,26 @@
 <h1> There are no entries in the database yet! </h1>
 <br>
 <a href="{{ url_for('add_entry_get') }}">Click here to add an entry</a>
-
 {% endfor %}
-
 <ul class="pager">
 	{% if has_next %}
 	<li class="previous" >
+		{% if limit %}
+		<a href="{{ url_for('entries', page=page + 1, limit=limit) }}">&larr; Older</a>
+		{% else %}
 		<a href="{{ url_for('entries', page=page + 1) }}">&larr; Older</a>
+		{% endif %}
+
 	</li>
 	{% endif %}
 	{% if has_prev %}
 	<li class="next">
+		{% if limit %}
+		<a href="{{ url_for('entries', page=page - 1, limit=limit) }}">&rarr; Newer</a>
+		{% else %}
 		<a href="{{ url_for('entries', page=page - 1) }}">&rarr; Newer</a>
+		{% endif %}
 	</li>
 	{% endif %}
 </ul>
-<h1>{{ limit }}</h1>
 {% endblock %}
