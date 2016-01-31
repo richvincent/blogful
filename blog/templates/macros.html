@@ -5,6 +5,8 @@
 			<li>
 				{{ entry.datetime | dateformat("%d/%m/%y") }}
 			</li>
+			<li>
+				<a href="/delete/confirmed/{{ entry.id }}">Delete Entry</a>
 		</ul>
 	</div>
 	<div class="col-md-10">

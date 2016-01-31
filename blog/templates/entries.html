@@ -4,6 +4,11 @@
 
 {% for entry in entries %}
 {{ macros.render_entry(entry) }}
+{% else %}
+<h1> There are no entries in the database yet! </h1>
+<br>
+<a href="{{ url_for('add_entry_get') }}">Click here to add an entry</a>
+
 {% endfor %}
 
 <ul class="pager">
@@ -18,4 +23,5 @@
 	</li>
 	{% endif %}
 </ul>
+<h1>{{ limit }}</h1>
 {% endblock %}

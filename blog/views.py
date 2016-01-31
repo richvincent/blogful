@@ -2,15 +2,23 @@ from flask import render_template
 
 from blog import app
 from .database import session, Entry
-from flask import request, redirect, url_for
-
+from flask import request, redirect, url_for, abort
 
 PAGINATE_BY = 5
 
 
 @app.route("/")
-@app.route("/page/<int:page>")
+@app.route("/page/<int:page>", methods=["GET"])
 def entries(page=1):
+
+    if request.method == "GET":
+        try:
+            PAGINATE_BY = int(request.args.get('limit'))
+            limit = request.args.get('limit')
+
+        except TypeError:
+            PAGINATE_BY = 5
+
     # Zero-indexed page
     page_index = page - 1
 
@@ -27,22 +35,33 @@ def entries(page=1):
     entries = entries.order_by(Entry.datetime.desc())
     entries = entries[start:end]
 
-    return render_template("entries.html",
-                           entries=entries,
-                           has_next=has_next,
-                           has_prev=has_prev,
-                           page=page,
-                           total_pages=total_pages
-                           )
+    try:
+        return render_template("entries.html",
+                               entries=entries,
+                               has_next=has_next,
+                               has_prev=has_prev,
+                               page=page,
+                               total_pages=total_pages,
+                               limit=limit
+                               )
+    except UnboundLocalError:
+                            return render_template("entries.html",
+                                                   entries=entries,
+                                                   has_next=has_next,
+                                                   has_prev=has_prev,
+                                                   page=page,
+                                                   total_pages=total_pages,
+                                                   )
 
 
-@app.route("/entry/<int:entry>")
-def display_entry(entry=1):
+@app.route("/entry/<int:entryId>/")
+def display_entry(entryId=1):
 
-    entries = session.query(Entry).filter_by(id=entry).all()
-
+    entry = session.query(Entry).get(entryId)
+    if entry is None:
+        abort(404)
     return render_template("display_entry.html",
-                           entries=entries)
+                           entry=entry)
 
 
 @app.route("/entry/add", methods=["GET"])
@@ -56,6 +75,8 @@ def add_entry_post():
         title=request.form["title"],
         content=request.form["content"],
     )
+    if entry is None:
+        abort(404)
     session.add(entry)
     session.commit()
     return redirect(url_for("entries"))
@@ -64,17 +85,19 @@ def add_entry_post():
 @app.route("/entry/<int:entryId>/edit/", methods=["GET"])
 def edit_entry_get(entryId=1):
 
-    entries = session.query(Entry).filter_by(id=entryId).all()
+    entry = session.query(Entry).get(entryId)
+    if entry is None:
+        abort(404)
 
-    return render_template("edit_entry.html", entries=entries)
+    return render_template("edit_entry.html", entry=entry)
 
 
 @app.route("/entry/<int:entryId>/edit/", methods=["POST"])
 def edit_entry_post(entryId=1):
 
-    entryId = request.form["id"]
-
     entry = session.query(Entry).get(entryId)
+    if entry is None:
+        abort(404)
     entry.title = request.form["title"]
     entry.content = request.form["content"]
     session.add(entry)
@@ -85,5 +108,19 @@ def edit_entry_post(entryId=1):
 @app.route("/entry/<int:entryId>/delete")
 def delete_entry_get(entryId=1):
 
-    # entryId = session.query(Entry).get(entryId)
-    return render_template("delete_entry.html")
+    entry = session.query(Entry).get(entryId)
+    if entry is None:
+        abort(404)
+    return render_template("delete_entry.html", entry=entry)
+
+
+@app.route("/delete/confirmed/<int:entryId>")
+def delete_entry_confirmed(entryId=1):
+
+    entry = session.query(Entry).get(entryId)
+    if entry is None:
+        abort(404)
+    session.delete(entry)
+    session.commit()
+
+    return render_template("delete_confirmed.html")
