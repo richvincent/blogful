@@ -4,8 +4,6 @@ from blog import app
 from .database import session, Entry
 from flask import request, redirect, url_for, abort
 
-PAGINATE_BY = 5
-
 
 @app.route("/")
 @app.route("/page/<int:page>", methods=["GET"])
@@ -14,7 +12,7 @@ def entries(page=1):
     if request.method == "GET":
         try:
             PAGINATE_BY = int(request.args.get('limit'))
-            limit = request.args.get('limit')
+            limit = int(request.args.get('limit'))
 
         except TypeError:
             PAGINATE_BY = 5
@@ -23,6 +21,13 @@ def entries(page=1):
     page_index = page - 1
 
     count = session.query(Entry).count()
+
+    try:
+        if limit > count:
+            abort(404)
+
+    except UnboundLocalError:
+        pass
 
     start = page_index * PAGINATE_BY
     end = start + PAGINATE_BY

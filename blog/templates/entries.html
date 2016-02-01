@@ -30,4 +30,12 @@
 	</li>
 	{% endif %}
 </ul>
+<ul class="pagination">
+	{% for i in range(total_pages|int): %}
+	{% if limit %}
+	<li><a href="{{ url_for('entries', page=(i+1)|string, limit=limit) }}">{{ i+1 }}</a>
+	{% else %}
+	<li><a href="{{ url_for('entries', page=(i+1)|string) }}">{{ i+1 }}</a>
+	{% endif %}
+	{% endfor %}
 {% endblock %}
