@@ -3,31 +3,31 @@ from flask import render_template
 from blog import app
 from .database import session, Entry
 from flask import request, redirect, url_for, abort
+from flask import flash
+from flask.ext.login import login_user
+from werkzeug.security import check_password_hash
+from .database import User
+
+from flask.ext.login import login_required
 
 
 @app.route("/")
 @app.route("/page/<int:page>", methods=["GET"])
 def entries(page=1):
 
-    if request.method == "GET":
-        try:
-            PAGINATE_BY = int(request.args.get('limit'))
-            limit = int(request.args.get('limit'))
+    try:
+        PAGINATE_BY = int(request.args.get('limit'))
 
-        except TypeError:
-            PAGINATE_BY = 5
+    except TypeError:
+        PAGINATE_BY = 5
 
     # Zero-indexed page
     page_index = page - 1
 
     count = session.query(Entry).count()
 
-    try:
-        if limit > count:
-            abort(404)
-
-    except UnboundLocalError:
-        pass
+    if PAGINATE_BY > count:
+        PAGINATE_BY = count
 
     start = page_index * PAGINATE_BY
     end = start + PAGINATE_BY
@@ -40,23 +40,14 @@ def entries(page=1):
     entries = entries.order_by(Entry.datetime.desc())
     entries = entries[start:end]
 
-    try:
-        return render_template("entries.html",
-                               entries=entries,
-                               has_next=has_next,
-                               has_prev=has_prev,
-                               page=page,
-                               total_pages=total_pages,
-                               limit=limit
-                               )
-    except UnboundLocalError:
-                            return render_template("entries.html",
-                                                   entries=entries,
-                                                   has_next=has_next,
-                                                   has_prev=has_prev,
-                                                   page=page,
-                                                   total_pages=total_pages,
-                                                   )
+    return render_template("entries.html",
+                           entries=entries,
+                           has_next=has_next,
+                           has_prev=has_prev,
+                           page=page,
+                           total_pages=total_pages,
+                           limit=PAGINATE_BY
+                           )
 
 
 @app.route("/entry/<int:entryId>/")
@@ -70,11 +61,13 @@ def display_entry(entryId=1):
 
 
 @app.route("/entry/add", methods=["GET"])
+@login_required
 def add_entry_get():
     return render_template("add_entry.html")
 
 
 @app.route("/entry/add", methods=["POST"])
+@login_required
 def add_entry_post():
     entry = Entry(
         title=request.form["title"],
@@ -129,3 +122,20 @@ def delete_entry_confirmed(entryId=1):
     session.commit()
 
     return render_template("delete_confirmed.html")
+
+
+@app.route("/login", methods=["GET"])
+def login_get():
+    return render_template("login.html")
+
+
+@app.route("/login", methods=["POST"])
+def login_post():
+    email = request.form["email"]
+    password = request.form["password"]
+    user = session.query(User).filter_by(email=email).first()
+    if not user or not check_password_hash(user.password, password):
+        flash("Incorrect username or password", "danger")
+        return redirect(url_for("login_get"))
+    login_user(user)
+    return redirect(request.args.get('next') or url_for("entries"))
