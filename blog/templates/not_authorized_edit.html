@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>{{ current_user.name }} is not authorized to edit this entry!</h1>
+<br>
+<a href="{{ url_for('entries') }}">Home</a>
+
+
+{% endblock %}

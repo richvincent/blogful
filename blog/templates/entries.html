@@ -1,7 +1,12 @@
 {% import "macros.html" as macros %}
 {% extends "base.html" %}
 {% block content %}
-
+{% if current_user.is_authenticated == True %}
+<a href="{{ url_for('logout') }}">Logout</a>
+<h1>{{ current_user.name }}</h1>
+{% else %}
+<a href="{{ url_for('login_get') }}">Login</a>
+{% endif %}
 {% for entry in entries %}
 {{ macros.render_entry(entry) }}
 {% else %}

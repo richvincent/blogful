@@ -10,6 +10,10 @@ from .database import User
 
 from flask.ext.login import login_required
 
+from flask.ext.login import current_user
+
+from flask.ext.login import logout_user
+
 
 @app.route("/")
 @app.route("/page/<int:page>", methods=["GET"])
@@ -72,6 +76,7 @@ def add_entry_post():
     entry = Entry(
         title=request.form["title"],
         content=request.form["content"],
+        author=current_user
     )
     if entry is None:
         abort(404)
@@ -81,16 +86,20 @@ def add_entry_post():
 
 
 @app.route("/entry/<int:entryId>/edit/", methods=["GET"])
+@login_required
 def edit_entry_get(entryId=1):
 
     entry = session.query(Entry).get(entryId)
     if entry is None:
         abort(404)
+    if entry.author_id != current_user.id:
+        return render_template("not_authorized_edit.html")
 
     return render_template("edit_entry.html", entry=entry)
 
 
 @app.route("/entry/<int:entryId>/edit/", methods=["POST"])
+@login_required
 def edit_entry_post(entryId=1):
 
     entry = session.query(Entry).get(entryId)
@@ -139,3 +148,10 @@ def login_post():
         return redirect(url_for("login_get"))
     login_user(user)
     return redirect(request.args.get('next') or url_for("entries"))
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('entries'))
