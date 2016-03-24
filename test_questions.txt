@@ -1,0 +1,5 @@
+Potential Tests:
+- Post delete
+- Post delete wrong user
+- Log out
+- erroneous page, redirect to default list page
