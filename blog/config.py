@@ -5,8 +5,8 @@ psqlPassword = os.environ.get('PSPASSWORD', 'Password1')
 
 
 class DevelopmentConfig(object):
-    SQLALCHEMY_DATABASE_URI = "postgresql://{}:{}@localhost:\
-        5432/blogful".format(psqlUser, psqlPassword)
+    SQLALCHEMY_DATABASE_URI = 'postgresql://{}:{}@localhost:'\
+        '5432/blogful'.format(psqlUser, psqlPassword)
     DEBUG = True
     SECRET_KEY = os.environ.get("BLOGFUL_SECRET_KEY", "")
 
